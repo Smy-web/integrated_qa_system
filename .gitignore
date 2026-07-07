@@ -1,0 +1,3 @@
+rag_qa/models/
+rag_qa/core/bert_query_classifier/
+rag_qa/nlp_bert_document-segmentation_chinese-base/
