@@ -3,32 +3,19 @@
 import configparser
 # 导入路径操作
 import os
-# 获取当前文件的绝对路径
 current_file_path = os.path.abspath(__file__)
-# print(f'current_file_path--》{current_file_path}')
-# 获取当前文件所在目录的绝对路径
 current_dir_path = os.path.dirname(current_file_path)
-# print(f'current_dir_path--》{current_dir_path}')
-# 获取项目根目录的绝对路径
 project_root = os.path.dirname(current_dir_path)
-
 config_file_path = os.path.join(project_root, 'config.ini')
-# print(f'config_file_path--》{config_file_path}')
+
 
 class Config():
     def __init__(self, config_file=config_file_path):
-        # config_file代表配置文件ini的路径
         # 1.创建配置文件解析器
         self.config = configparser.ConfigParser()
         # 2. 读取配置文件
-        # self.config.read(config_file)
         with open(config_file, 'r', encoding='utf-8') as fp:
             self.config.read_file(fp)
-        # 3. 获取相关的配置
-        # 3.1 获取Mysql数据库的配置
-        # mysql的主机地址
-        # self.MYSQL_HOST = self.config["mysql"]["host1"]
-        # fallback如果键不存在，这就是充当默认值
         self.MYSQL_HOST = self.config.get('mysql', 'host', fallback='localhost')
         # MySQL 用户名
         self.MYSQL_USER = self.config.get('mysql', 'user', fallback='root')

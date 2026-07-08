@@ -1,17 +1,11 @@
 '''
 todo: 和之前的rag_system不一样的地方是：生成答案时，考虑了历史对话记录，以及我们大模型输出结果时stream流式输出结果
 '''
-# -*-coding:utf-8-*-
-# core/rag_system.py 源码
 import sys, os
 # 导入 OpenAI 客户端，用于调用 DashScope API
 from openai import OpenAI
-# 获取当前文件所在目录的绝对路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{current_dir}')
-# 获取core文件所在的目录的绝对路径
 rag_qa_path = os.path.dirname(current_dir)
-# print(f'rag_qa_path--》{rag_qa_path}')
 sys.path.insert(0, rag_qa_path)
 # 获取根目录文件所在的绝对位置
 project_root = os.path.dirname(rag_qa_path)
@@ -44,7 +38,7 @@ class RAGSystem:
         self.strategy_selector = StrategySelector()
         #   定义方法，生成答案
 
-    #   定义类似私有方法，使用回溯问题进行检索 （注意讲义中没有加source_filter参数，这里补齐了）
+    #   定义类似私有方法，使用回溯问题进行检索
     def _retrieve_with_backtracking(self, query, source_filter):
         logger.info(f"使用回溯问题策略进行检索 (查询: '{query}')")
         #   获取回溯问题生成的 Prompt 模板
@@ -61,7 +55,7 @@ class RAGSystem:
             logger.error(f"回溯问题策略执行失败: {e}")
             return []
 
-    #   定义类似私有方法，使用子查询进行检索（注意讲义中没有加source_filter参数，这里补齐了）
+    #   定义类似私有方法，使用子查询进行检索
     def _retrieve_with_subqueries(self, query, source_filter):
         logger.info(f"使用子查询策略进行检索 (查询: '{query}')")
         #   获取子查询生成的 Prompt 模板
@@ -69,7 +63,6 @@ class RAGSystem:
         try:
             #   调用大语言模型生成子查询列表
             subqueries_text = self.llm(subquery_prompt_template.format(query=query)).strip()
-            # print(f'subqueries_text--》{subqueries_text}')
             subqueries = [q.strip() for q in subqueries_text.split("\n") if q.strip()]
             logger.info(f"生成的子查询: {subqueries}")
             if not subqueries:
@@ -87,8 +80,6 @@ class RAGSystem:
                 )
                 all_docs.extend(docs)
                 logger.info(f"子查询 '{sub_q}' 检索到 {len(docs)} 个文档")
-            # print(f'all_docs-->{len(all_docs)}')
-            # print(f'all_docs[0]-->{all_docs[0]}')
             #   对所有检索结果进行去重 (基于对象内存地址，如果 Document 内容相同但对象不同则无法去重)
             #   更可靠的去重方式是基于文档内容或 ID
             unique_docs_dict = {doc.page_content: doc for doc in all_docs}  # 基于内容去重
@@ -135,7 +126,6 @@ class RAGSystem:
             ranked_chunks = self.vector_store.hybrid_search_with_rerank(
                 query, k=conf.RETRIEVAL_K, source_filter=source_filter
             )  # 注意 hybrid_search_with_rerank 返回的是 rerank 后的父文档
-            # print(f'ranked_chunks--》{ranked_chunks}')
 
         logger.info(f"策略 '{strategy}' 检索到 {len(ranked_chunks)} 个候选文档 (可能已是父文档)")
         final_context_docs = ranked_chunks[:conf.CANDIDATE_M]
@@ -173,7 +163,6 @@ class RAGSystem:
             if context_docs:
                 context = "\n\n".join([doc.page_content for doc in context_docs])  # 使用换行符分隔文档
                 logger.info(f"构建上下文完成，包含 {len(context_docs)} 个文档块")
-                # logger.debug(f"上下文内容:\n{context[:500]}...") # Debug 日志可以打印部分上下文
             else:
                 context = ""
                 logger.info("未检索到相关文档，上下文为空")
@@ -212,8 +201,6 @@ if __name__ == '__main__':
             )
             # 遍历流式输出的每个 chunk
             for chunk in completion:
-                # print(f'chunk--》{chunk}')
-                # print("*"*80)
                 if chunk.choices and chunk.choices[0].delta.content:
                     #         # 获取当前 chunk 的内容
                     content = chunk.choices[0].delta.content

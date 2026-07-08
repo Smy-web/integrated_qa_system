@@ -1,4 +1,3 @@
-# -*-coding:utf-8-*-
 # 导入 MySQL 客户端
 from db.mysql_client import MySQLClient
 # 导入 Redis 客户端
@@ -58,6 +57,8 @@ def main():
         logger.error(f'系统错误：{e}')
     finally:
         mysql_qa.mysql_client.close()
+
+
 if __name__ == '__main__':
     main()
 

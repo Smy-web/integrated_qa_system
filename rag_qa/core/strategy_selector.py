@@ -1,17 +1,9 @@
-# -*-coding:utf-8-*-
-# core/strategy_selector.py 源码
 import sys, os
-# 获取当前文件所在目录的绝对路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{current_dir}')
-# 获取core文件所在的目录的绝对路径
 rag_qa_path = os.path.dirname(current_dir)
-# print(f'rag_qa_path--》{rag_qa_path}')
 sys.path.insert(0, rag_qa_path)
-# 获取根目录文件所在的绝对位置
 project_root = os.path.dirname(rag_qa_path)
 sys.path.insert(0, project_root)
-# 导入 LangChain 提示模板
 from langchain.prompts import PromptTemplate
 # 导入日志和配置
 from base import logger, Config
@@ -39,13 +31,6 @@ class StrategySelector:
                 ],
                 temperature=0.1
             )
-            # print(f'completion--》{completion}')
-            # print('*'*80)
-            # print(f'completion.choices -->{completion.choices }')
-            # print('*'*80)
-            # print(f'completion.choices[0].message -->{completion.choices[0].message}')
-            # print('*' * 80)
-            # print(f'completion.choices[0].message.content -->{completion.choices[0].message.content}')
             # 返回完成结果
             return completion.choices[0].message.content if completion.choices else "直接检索"
         except Exception as e:
@@ -97,12 +82,8 @@ class StrategySelector:
         )
     #   定义方法，选择检索策略
     def select_strategy(self, query):
-        # print(f'self.strategy_prompt_template-->{self.strategy_prompt_template}')
-        # print(f'self.strategy_prompt_template.format(query=query)-->{self.strategy_prompt_template.format(query=query)}')
-        # print("*"*80)
         #   调用 LLM 获取检索策略
         strategy = self.call_dashscope(self.strategy_prompt_template.format(query=query)).strip()
-        # print(f'strategy--》{strategy}')
         logger.info(f"为查询 '{query}' 选择的检索策略：{strategy}")
         return strategy
 

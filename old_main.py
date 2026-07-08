@@ -135,7 +135,6 @@ def main():
         # 无论是否发生错误，关闭 MySQL 连接
         qa_system.mysql_client.close()
 
+
 if __name__ == '__main__':
-    # qa_system = IntegratedQASystem()
-    # print(qa_system.query(query="AI学科的课程内容有哪些", source_filter='ai'))
     main()

@@ -1,20 +1,13 @@
-# base/logger.py
-# -*- coding:utf-8 -*-
+
 # 导入日志库
 import logging
 # 导入路径操作库
 import os
 # 导入配置类
 from config import Config
-# 获取当前文件的绝对路径
 current_file_path = os.path.abspath(__file__)
-# print(f'current_file_path--》{current_file_path}')
-# 获取当前文件所在目录的绝对路径
 current_dir_path = os.path.dirname(current_file_path)
-# print(f'current_dir_path--》{current_dir_path}')
-# 获取项目根目录的绝对路径
 project_root = os.path.dirname(current_dir_path)
-
 log_file_path = os.path.join(project_root, Config().LOG_FILE)
 
 

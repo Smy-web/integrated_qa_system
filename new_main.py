@@ -1,4 +1,3 @@
-# -*- coidng:utf-8 -*-
 # 导入 MySQL 和 Redis 客户端，管理数据库和缓存
 from mysql_qa import MySQLClient, RedisClient, BM25Search
 # 导入 RAG 系统组件，用于知识库检索和答案生成
@@ -80,8 +79,6 @@ class IntegratedQASystem:
             )
             # 遍历流式输出的每个 chunk
             for chunk in completion:
-                # print(f'chunk--》{chunk}')
-                # print("*"*80)
                 if chunk.choices and chunk.choices[0].delta.content:
             #         # 获取当前 chunk 的内容
                     content = chunk.choices[0].delta.content
@@ -103,7 +100,6 @@ class IntegratedQASystem:
                       ORDER BY timestamp DESC
                       LIMIT %s
                   """, (session_id, 5))
-            # print(f'self.mysql_client.cursor.fetchall()---》{self.mysql_client.cursor.fetchall()}')
             # 将查询结果转换为字典列表
             history = [{"question": row[0], "answer": row[1]} for row in self.mysql_client.cursor.fetchall()]
             # 反转结果，按时间正序返回
@@ -172,11 +168,8 @@ class IntegratedQASystem:
         self.logger.info(f"处理查询: '{query}' (会话ID: {session_id})")
         # 获取对话历史，若无 session_id 则返回空列表
         history = self.get_session_history(session_id) if session_id else []
-        # print(f'history--->{history}')
         # 执行 BM25 搜索，获取答案和是否需要 RAG 的标志
         answer, need_rag = self.bm25_search.search(query, threshold=0.85)
-        # print(f'answer-——》{answer}')
-        # print(f'need_rag-——》{need_rag}')
         if answer:
             # 如果找到可靠答案，记录答案到日志
             self.logger.info(f"MySQL答案: {answer}")
@@ -283,9 +276,4 @@ class IntegratedQASystem:
 
 if __name__ == "__main__":
     new_qa_system = IntegratedQASystem()
-    # answer = new_qa_system.query(query='什么是AI', session_id="603db0cf-cfa0-4433-9078-f37f3b29fd7c")
-    # for value in answer:
-    #     print(value)
-    # results = new_qa_system._fetch_recent_history(session_id="603db0cf-cfa0-4433-9078-f37f3b29fd7c")
-    # print(results)
     new_qa_system.main()

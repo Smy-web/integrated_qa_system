@@ -42,22 +42,16 @@ class OCRPDFLoader(BaseLoader):
         # 打开pdf文件
         doc = fitz.open(self.file_path)
         ## 获取页数
-        # print(f'len(doc)-->{len(doc)}')
         resp = ""
         b_unit = tqdm(total=doc.page_count, desc="OCRPDFLoader context page index: 0")
         for i, page in enumerate(doc):
             b_unit.set_description("OCRPDFLoader context page index: {}".format(i))
             b_unit.refresh()
-            # 提取文本：默认使用 "text" 模式提取文本。
-            # text = page.get_text("")
             text = page.get_text("text")
             resp += text + "\n"
-            # print(f'resp-->{resp}')
             # 获取图片：获得所有显示的图像的元信息列表。
             # 它适用于所有文档类型，不仅限于 PDF。
             img_list = page.get_image_info(xrefs=True)
-            # print(f'img_list--》{img_list}')
-            # print(f'img_list--》{len(img_list)}')
             for img in img_list:
                 # xref一种编号，指向该图像对象在PDF文件中的位置，程序可以通过这个编号快速定位和提取图像数据。
                 if xref := img.get("xref"):
@@ -68,7 +62,6 @@ class OCRPDFLoader(BaseLoader):
                             or (bbox[3] - bbox[1]) / (page.rect.height) < PDF_OCR_THRESHOLD[1]):
                         continue
                     pix = fitz.Pixmap(doc, xref)
-                    # print(f'page.rotation-->{page.rotation}')
                     if int(page.rotation) != 0:  # 如果Page有旋转角度，则旋转图片
                         img_array = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, -1)
                         tmp_img = Image.fromarray(img_array)
@@ -78,8 +71,6 @@ class OCRPDFLoader(BaseLoader):
                     else:
                         img_array = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, -1)
 
-                    # result：包含了图像中检测到的所有文本框的位置、文本内容和置信度信息。
-                    # _：它是一个包含了时间数据的列表，可以用于优化模型运行速度。
                     result, _ = ocr(img_array)
                     if result:
                         ocr_result = [line[1] for line in result]
@@ -112,8 +103,9 @@ class OCRPDFLoader(BaseLoader):
         rotated_img = cv2.warpAffine(img, M, (new_w, new_h))
         return rotated_img
 
+
 if __name__ == '__main__':
-    pdf_loader = OCRPDFLoader(file_path="/Users/ligang/Desktop/EduRAG课堂资料/codes/integrated_qa_system/rag_qa/samples/ocr_03.pdf")
+    pdf_loader = OCRPDFLoader(file_path="/Users/Smy/Desktop/EduRAG/codes/integrated_qa_system/rag_qa/samples/ocr_03.pdf")
     doc = pdf_loader.load()
 
     print(type(doc))

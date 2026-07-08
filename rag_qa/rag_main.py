@@ -3,7 +3,6 @@ import os
 import sys
 # 获取当前文件所在目录的绝对路径
 rag_qa_path  = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{rag_qa_path }')
 sys.path.insert(0, rag_qa_path)
 core_path = os.path.join(rag_qa_path, 'core')
 sys.path.insert(0, core_path)
@@ -62,7 +61,6 @@ def main(query_mode=True, directory_path="data"):
             logger.error(f"LLM API (call_dashscope) 调用失败: {e}")
             return f"错误: 调用LLM失败 - {e}"
 
-    # print(call_dashscope(prompt='你是谁'))
     # 初始化 VectorStore
     try:
         vector_store = VectorStore(
@@ -130,8 +128,6 @@ def main(query_mode=True, directory_path="data"):
 
             source_filter_input = input(f"请输入学科类别 ({'/'.join(valid_sources)}) (直接回车默认不过滤)：").strip()
             source_filter = None  # 默认不过滤
-            # print(f'source_filter_input-->{source_filter_input}')
-            # print(f'source_filter-->{source_filter}')
             if source_filter_input:
                 if source_filter_input in valid_sources:
                     source_filter = source_filter_input

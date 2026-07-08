@@ -1,4 +1,3 @@
-# cache/redis_client.py
 # 导入 Redis 客户端
 import redis
 # 导入 JSON 处理
@@ -6,9 +5,7 @@ import json
 import os, sys
 # 获取当前文件所在目录的绝对路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{current_dir}')
 module_dir = os.path.dirname(current_dir)
-# print(f'module_dir--》{module_dir}')
 project_root = os.path.dirname(module_dir)
 sys.path.insert(0, project_root)
 # 导入配置和日志
@@ -67,19 +64,16 @@ class RedisClient:
             if answer:
                 # 记录获取成功
                 self.logger.info(f"从 Redis 获取答案: {query}")
-                # 返回答案
                 return answer
-            # 返回 None
             return None
         except redis.RedisError as e:
             # 记录查询失败
             self.logger.error(f"Redis 查询失败: {e}")
-            # 返回 None
             return None
+
 if __name__ == '__main__':
     redcli = RedisClient()
     print(redcli)
     print(redcli.client.keys("*"))
-    # print(redcli.get_data(key="user2"))
-    # print(redcli.get_answer(query="黑马程序员"))
+
 

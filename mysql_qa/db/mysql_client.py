@@ -4,11 +4,8 @@ import pymysql
 import pandas as pd
 # 导入配置和日志
 import sys, os
-# 获取当前文件所在目录的绝对路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{current_dir}')
 module_dir = os.path.dirname(current_dir)
-# print(f'module_dir--》{module_dir}')
 project_root = os.path.dirname(module_dir)
 sys.path.insert(0, project_root)
 from base import Config, logger
@@ -63,7 +60,6 @@ class MySQLClient:
             self.logger.info("Mysql数据插入成功")
         except Exception as e:
             self.logger.error(f'Mysql数据插入失败:{e}')
-            # .rollback()取消当前事务的所有操作，让数据库"回到"执行这些操作状态之前的一个状态
             self.connection.rollback()
             raise
 
@@ -73,16 +69,13 @@ class MySQLClient:
             # 执行查询
             self.cursor.execute("SELECT question FROM jpkb")
             # 获取结果
-            #   # results:(('static静态方法使用非静态变量',), ...)
             results = self.cursor.fetchall()
             # 记录获取成功
             self.logger.info("成功获取问题")
-            # 返回结果
             return results
         except pymysql.MySQLError as e:
             # 记录查询失败
             self.logger.error(f"查询失败: {e}")
-            # 返回空列表
             return []
 
     def fetch_answer(self, question):
@@ -92,13 +85,11 @@ class MySQLClient:
             self.cursor.execute("SELECT answer FROM jpkb WHERE question=%s", (question,))
             # 获取结果
             result = self.cursor.fetchone()
-            # print(f'result--》{result}')
             # 返回答案或 None
             return result[0] if result else None
         except pymysql.MySQLError as e:
             # 记录答案获取失败
             self.logger.error(f"答案获取失败: {e}")
-            # 返回 None
             return None
 
     def close(self):
@@ -111,6 +102,7 @@ class MySQLClient:
         except pymysql.MySQLError as e:
             # 记录关闭失败
             self.logger.error(f"关闭连接失败: {e}")
+
 if __name__ == '__main__':
     mysql_client = MySQLClient()
     # mysql_client.create_table()

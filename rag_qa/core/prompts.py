@@ -101,10 +101,9 @@ class RAGPrompts:
             #   定义输入变量
             input_variables=["query"],
         )
+
+
 if __name__ == '__main__':
-    # rga_prompt = RAGPrompts.rag_prompt()
-    # result = rga_prompt.format(context="黑马程序员", question="这个机构叫什么名称", phone="12345")
-    # print(f'result-->{result}')
     hyde = RAGPrompts.subquery_prompt()
     result = hyde.format(query="AI和JAVA有什么区别")
     print(result)

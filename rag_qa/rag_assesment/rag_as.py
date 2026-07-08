@@ -28,7 +28,6 @@ with open("rag_evaluate_data.json", "r", encoding="utf-8") as f:
     # 将JSON文件内容加载到data变量中，data为包含多个数据条目的列表
     data = json.load(f)
 
-# print(f'data--》{data}')
 print(f'data--》{len(data)}')
 # 2. 转换为RAGAS格式
 # 创建字典eval_data，将JSON数据转换为RAGAS要求的字段格式
@@ -42,16 +41,10 @@ eval_data = {
     # 提取每个数据条目的ground_truth字段，组成真实答案列表
     "ground_truth": [item["ground_truth"] for item in data]
 }
-# print(eval_data)
-# 使用Dataset.from_dict将字典转换为RAGAS所需的Dataset对象
+
 dataset = Dataset.from_dict(eval_data)
 print(f'dataset--》{dataset}')
 
-# 3. 配置RAGAS评估环境
-# 初始化ChatOpenAI模型，指定使用gpt-4模型，并设置OpenAI API密钥
-# llm = ChatOpenAI(model="gpt-4", openai_api_key=os.environ["OPENAI_API_KEY"])
-# # 初始化OpenAI嵌入模型，用于计算语义相似度，设置API密钥
-# embeddings = OpenAIEmbeddings(openai_api_key=os.environ["OPENAI_API_KEY"])
 
 # # 初始化ChatOllama模型，需要选择一个模型，设置ollama服务地址
 llm = ChatOllama(model="qwen2.5:7b", base_url='http://localhost:11434')
@@ -78,9 +71,7 @@ result = evaluate(
 )
 
 # 5. 输出并保存结果
-# 打印评估结果标题
 print("RAGAS评估结果：")
-# 打印评估结果，包含各指标的分数
 print(result)
 
 

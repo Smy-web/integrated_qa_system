@@ -5,12 +5,9 @@ import os
 # 导入 PyTorch
 import torch
 import sys
-# 获取当前文件所在目录的绝对路径
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# print(f'current_dir--》{current_dir}')
-# 获取core文件所在的目录的绝对路径
 rag_qa_path = os.path.dirname(current_dir)
-# 获取根目录文件所在的绝对位置
 project_root = os.path.dirname(rag_qa_path)
 sys.path.insert(0, project_root)
 # 导入日志
@@ -55,7 +52,6 @@ class QueryClassifier:
         else:
             # 初始化新模型
             self.model = BertForSequenceClassification.from_pretrained("../models/bert-base-chinese", num_labels=2)
-            # print(f'self.model--》{self.model}')
             # 将模型移到指定设备
             self.model.to(self.device)
             # 记录初始化模型的日志
@@ -70,7 +66,6 @@ class QueryClassifier:
     def train_model(self, data_file="training_dataset_hybrid_5000.json"):
         """训练 BERT 分类模型"""
         # 加载数据集
-        # print(f'os.path.exists(data_file)---》{os.path.exists(data_file)}')
         if not os.path.exists(data_file):
             logger.error(f"数据集文件 {data_file} 不存在")
             raise FileNotFoundError(f"数据集文件 {data_file} 不存在")
@@ -78,28 +73,18 @@ class QueryClassifier:
         with open(data_file, "r", encoding="utf-8") as f:
             # print(f'f.readlines()--》{f.readlines()}')
             data = [json.loads(value) for value in f.readlines()]
-            # print(f'data--》{data}')
-            # print(f'data--》{type(data[0])}')
-
         texts = [item["query"] for item in data]
-        # print(f'texts--》{texts[:2]}')
-        # print(f'样本个数texts--》{len(texts)}')
         labels = [item["label"] for item in data]
-        # print(f'labels--》{labels[:2]}')
         # 数据划分
         train_texts, val_texts, train_labels, val_labels = train_test_split(
             texts, labels, test_size=0.2, random_state=42
         )
-        # print(f'train_texts--》{len(train_texts)}')
-        # print(f'val_texts--》{len(val_texts)}')
         # 数据预处理
         train_encodings, train_labels = self.preprocess_data(train_texts, train_labels)
         val_encodings, val_labels = self.preprocess_data(val_texts, val_labels)
         # 得到dataset对象
         train_dataset = self.create_dataset(train_encodings, train_labels)
         val_dataset = self.create_dataset(val_encodings, val_labels)
-        # print('取出一个样本', train_dataset[1])
-        # print(f'验证集样本的个数--》{len(train_dataset)}')
         # 设置训练参数
         training_args = TrainingArguments(
             output_dir="./bert_results",# 模型（检查点）以及日志保存的路径等，
@@ -117,8 +102,6 @@ class QueryClassifier:
             metric_for_best_model="eval_loss", # 评估最优模型的指标（验证集损失）
             fp16=False,  # 禁用混合精度
         )
-
-        # print(f'training_args--》{training_args}')
         # 初始化Trainer
         trainer = Trainer(model=self.model, args=training_args,
                           train_dataset=train_dataset, eval_dataset=val_dataset,
@@ -143,9 +126,6 @@ class QueryClassifier:
             return_tensors="pt"
         )
         labels = [self.label_map[label] for label in labels]
-        # print(f'encodings--》{encodings}')
-        # print(f'encodings--》{encodings["input_ids"].shape}')
-        # print(f'labels--》{labels}')
         return encodings, labels
 
     def create_dataset(self, encodings, labels):
@@ -190,8 +170,6 @@ class QueryClassifier:
         predictions = trainer.predict(dataset)
         print(f'predictions--》{predictions}')
         pred_labels = np.argmax(predictions.predictions, axis=-1)
-        # print(f'pred_labels--》{type(pred_labels)}')
-        # print(f'predictions.label_ids--》{predictions.label_ids}')
         true_labels = labels
 
         logger.info("分类报告:")
@@ -218,16 +196,13 @@ class QueryClassifier:
         with torch.no_grad():
             # 获取模型输出
             outputs = self.model(**encoding)
-            # print(f'outputs--》{outputs}')
-            # logits = outputs.logits
-            # print(f'logits--》{logits}')
             # # 获取预测结果
             prediction = torch.argmax(outputs.logits, dim=1).item()
         # 根据预测结果返回类别
         return "专业咨询" if prediction == 1 else "通用知识"
+
+
 if __name__ == '__main__':
     query_classify = QueryClassifier()
-    # data_file = '../classify_data/model_generic_5000.json'
-    # query_classify.train_model(data_file)
-    result = query_classify.predict_category(query="AI的课程大纲是什么")
+    result = query_classify.predict_category(query="人工智能的课程如何学习")
     print(result)

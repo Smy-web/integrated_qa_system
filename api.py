@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# 导入 FastAPI 核心类：用于创建 API 应用、处理请求、返回错误
+
 from fastapi import FastAPI, HTTPException, Request
 # 导入 StreamingResponse，用于支持流式响应（逐字返回答案）
 from fastapi.responses import StreamingResponse
@@ -38,9 +37,9 @@ async def handle_query(request: Request):
 
     # 从 JSON 中获取用户问题，去除首尾空格，若无则为空字符串
     query = body.get("query", "").strip()
-    # 获取学科过滤条件（可选），若未提供则为 None
+    # 获取学科过滤条件，若未提供则为 None
     source_filter = body.get("source_filter", None)
-    # 获取会话 ID（可选），用于维护多轮对话历史
+    # 获取会话 ID，用于维护多轮对话历史
     session_id = body.get("session_id", None)
 
     # 如果用户没有输入问题，返回 400 错误
@@ -60,10 +59,10 @@ async def handle_query(request: Request):
             detail=f"无效的学科类别。支持: {valid_sources}"
         )
 
-    # 定义一个生成器函数，用于流式返回答案（逐 token 输出）
+    # 定义一个生成器函数，用于流式返回答案
     def generate_response():
         try:
-            # 调用问答系统的核心 query 方法，返回生成器（每次产出一个 token）
+            # 调用问答系统的核心 query 方法，返回生成器
             for token, is_complete in qa_system.query(
                 query=query,
                 source_filter=source_filter,
@@ -71,12 +70,10 @@ async def handle_query(request: Request):
             ):
                 # 构造要返回的 JSON 消息，包含当前文本片段和状态
                 message = {
-                    "token": token,           # 当前生成的文本（如一个字）
+                    "token": token,           # 当前生成的文本
                     "is_complete": is_complete,     # 是否是最后一个 token
                     "session_id": session_id        # 返回会话 ID，便于前端维护
                 }
-                # 使用 SSE 格式：data: {json}\n\n
-                # ensure_ascii=False 确保中文不被转义为 \uXXXX
                 yield f"data: {json.dumps(message, ensure_ascii=False)}\n\n"
 
         # 捕获问答系统内部任何异常（如数据库错误、LLM 调用失败）
