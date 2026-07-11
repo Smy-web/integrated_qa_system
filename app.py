@@ -37,15 +37,15 @@ qa_system = IntegratedQASystem()
 GREETING_PATTERNS = [
     {
         "pattern": r"^(你好|您好|hi|hello)",
-        "response": "你好！我是黑马程序员，专注于为学生答疑解惑，很高兴为你服务！"
+        "response": "你好！我是知识问答小助手，专注于为学生答疑解惑，很高兴为你服务！"
     },
     {
         "pattern": r"^(你是谁|您是谁|你叫什么|你的名字|who are you)",
-        "response": "我是黑马程序员，你的智能学习助手，致力于提供 IT 教育相关的解答！"
+        "response": "我是知识问答小助手，你的智能学习助手，致力于提供 IT 教育相关的解答！"
     },
     {
         "pattern": r"^(在吗|在不在|有人吗)",
-        "response": "我在！我是黑马程序员，随时为你解答问题！"
+        "response": "我在！我是知识问答小助手，随时为你解答问题！"
     },
     {
         "pattern": r"^(干嘛呢|你在干嘛|做什么)",
@@ -53,11 +53,13 @@ GREETING_PATTERNS = [
     }
 ]
 
+
 # 定义请求模型
 class QueryRequest(BaseModel):
     query: str
     source_filter: Optional[str] = None
     session_id: Optional[str] = None
+
 
 # 定义响应模型
 class QueryResponse(BaseModel):
@@ -66,19 +68,23 @@ class QueryResponse(BaseModel):
     session_id: str
     processing_time: float
 
+
 # 添加静态文件服务
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # 根路径重定向到index.html
 @app.get("/")
 async def read_root():
     return FileResponse("static/index.html")
 
+
 # 创建新会话
 @app.post("/api/create_session")
 async def create_session():
     session_id = str(uuid.uuid4())
     return {"session_id": session_id}
+
 
 # 查询历史消息
 @app.get("/api/history/{session_id}")
@@ -88,6 +94,7 @@ async def get_history(session_id: str):
         return {"session_id": session_id, "history": history}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取历史记录失败: {str(e)}")
+
 
 # 清除历史消息
 @app.delete("/api/history/{session_id}")
@@ -141,6 +148,7 @@ async def query(request: QueryRequest):
         "session_id": session_id,
         "processing_time": time.time() - start_time
     }
+
 
 # 流式查询WebSocket接口
 @app.websocket("/api/stream")
@@ -239,11 +247,14 @@ async def websocket_endpoint(websocket: WebSocket):
 async def health_check():
     return {"status": "healthy"}
 
+
 # 获取有效的学科类别
 @app.get("/api/sources")
 async def get_sources():
     return {"sources": qa_system.config.VALID_SOURCES}
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
+
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=False)

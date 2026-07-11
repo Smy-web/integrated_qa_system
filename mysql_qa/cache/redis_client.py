@@ -71,9 +71,12 @@ class RedisClient:
             self.logger.error(f"Redis 查询失败: {e}")
             return None
 
+
 if __name__ == '__main__':
     redcli = RedisClient()
     print(redcli)
+    print(redcli.client.keys("*"))
+    redcli.client.delete('answer:用上下文管理器实现函数运行时间的计算?')
     print(redcli.client.keys("*"))
 
 

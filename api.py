@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException, Request
 # 导入 StreamingResponse，用于支持流式响应（逐字返回答案）
 from fastapi.responses import StreamingResponse
@@ -13,6 +12,7 @@ app = FastAPI(title="集成问答系统 API", description="基于 RAG + MySQL + 
 
 # 全局初始化一个问答系统实例
 qa_system = IntegratedQASystem()
+
 
 # 使用 @app.post 装饰器，将下面的函数注册为 POST 请求接口，路径为 /query
 @app.post("/query")
@@ -64,15 +64,15 @@ async def handle_query(request: Request):
         try:
             # 调用问答系统的核心 query 方法，返回生成器
             for token, is_complete in qa_system.query(
-                query=query,
-                source_filter=source_filter,
-                session_id=session_id
+                    query=query,
+                    source_filter=source_filter,
+                    session_id=session_id
             ):
                 # 构造要返回的 JSON 消息，包含当前文本片段和状态
                 message = {
-                    "token": token,           # 当前生成的文本
-                    "is_complete": is_complete,     # 是否是最后一个 token
-                    "session_id": session_id        # 返回会话 ID，便于前端维护
+                    "token": token,  # 当前生成的文本
+                    "is_complete": is_complete,  # 是否是最后一个 token
+                    "session_id": session_id  # 返回会话 ID，便于前端维护
                 }
                 yield f"data: {json.dumps(message, ensure_ascii=False)}\n\n"
 
@@ -83,22 +83,24 @@ async def handle_query(request: Request):
             qa_system.logger.error(error_msg)
             # 构造错误消息，标记流结束
             message = {
-                "error": error_msg,          # 错误信息
-                "is_complete": True          # 表示流已结束
+                "error": error_msg,  # 错误信息
+                "is_complete": True  # 表示流已结束
             }
             # 同样以 SSE 格式返回错误
             yield f"data: {json.dumps(message, ensure_ascii=False)}\n\n"
 
     # 返回流式响应，媒体类型为 text/event-stream（SSE 标准）
     return StreamingResponse(
-        generate_response(),           # 传入生成器函数
-        media_type="text/event-stream" # 告诉浏览器这是流式数据
+        generate_response(),  # 传入生成器函数
+        media_type="text/event-stream"  # 告诉浏览器这是流式数据
     )
+
 
 # 当直接运行此脚本时（python main.py），启动 Uvicorn 服务器
 if __name__ == '__main__':
     # 导入 Uvicorn（用于运行 FastAPI）
     import uvicorn
+
     # 启动服务器，监听所有 IP 地址的 8000端口
     # 可通过 http://localhost:8003 访问 API
     uvicorn.run(app, host="0.0.0.0", port=8000)

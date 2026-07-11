@@ -1,4 +1,5 @@
 import sys, os
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rag_qa_path = os.path.dirname(current_dir)
 sys.path.insert(0, rag_qa_path)
@@ -38,7 +39,6 @@ class StrategySelector:
             logger.error(f"DashScope API 调用失败: {e}")
             # 默认返回直接检索
             return "直接检索"
-
 
     def _get_strategy_prompt(self):
         #   定义类似私有方法，获取策略选择 Prompt 模板
@@ -80,6 +80,7 @@ class StrategySelector:
             ,
             input_variables=["query"],
         )
+
     #   定义方法，选择检索策略
     def select_strategy(self, query):
         #   调用 LLM 获取检索策略
@@ -87,9 +88,7 @@ class StrategySelector:
         logger.info(f"为查询 '{query}' 选择的检索策略：{strategy}")
         return strategy
 
+
 if __name__ == '__main__':
     ss = StrategySelector()
-    # print(f'ss.clinet--->{ss.client}')
-    # result = ss.call_dashscope(prompt="你是谁")
-    # print(f'result--》{result}')
-    ss.select_strategy(query="Mysql数据库能不能支持100w个样本的插入")
+    ss.select_strategy(query="比较 Milvus 和 Zilliz Cloud 的优缺点")

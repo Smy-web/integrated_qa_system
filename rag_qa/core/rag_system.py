@@ -167,7 +167,7 @@ class RAGSystem:
             logger.info("未检索到相关文档，上下文为空")
         #   构造 Prompt，调用大语言模型生成答案
         prompt_input = self.rag_prompt.format(
-            context=context, question=query, phone=conf.CUSTOMER_SERVICE_PHONE
+            context=context, question=query, history="", phone=conf.CUSTOMER_SERVICE_PHONE
         )
 
         try:
@@ -184,7 +184,6 @@ class RAGSystem:
 if __name__ == '__main__':
     vector_store = VectorStore()
     llm = StrategySelector().call_dashscope
-    # print(llm(prompt="什么是AI"))
     rag_system = RAGSystem(vector_store, llm)
     answer = rag_system.generate_answer(query="AI学科的课程内容有什么", source_filter="ai")
     print(answer)

@@ -12,6 +12,8 @@ import time
 import uuid
 # 导入 pymysql 错误处理，用于数据库操作的异常捕获
 import pymysql
+
+
 class IntegratedQASystem:
     def __init__(self):
         # 初始化日志工具，用于记录系统运行信息
@@ -80,7 +82,7 @@ class IntegratedQASystem:
             # 遍历流式输出的每个 chunk
             for chunk in completion:
                 if chunk.choices and chunk.choices[0].delta.content:
-            #         # 获取当前 chunk 的内容
+                    #         # 获取当前 chunk 的内容
                     content = chunk.choices[0].delta.content
                     yield content
         except Exception as e:
@@ -111,7 +113,7 @@ class IntegratedQASystem:
             # 返回空列表
             return []
 
-    def get_session_history(self, session_id ):
+    def get_session_history(self, session_id):
         """从MySQL获取会话历史"""
         # 调用 _fetch_recent_history 获取对话历史
         return self._fetch_recent_history(session_id)
@@ -161,7 +163,6 @@ class IntegratedQASystem:
             raise
 
     def query(self, query, source_filter=None, session_id=None):
-        # print(f'你好')
         """查询集成系统，支持对话历史和流式输出"""
         start_time = time.time()  # 记录查询开始时间
         # 记录查询信息到日志

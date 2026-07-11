@@ -18,7 +18,6 @@ def setup_logging(log_file=log_file_path):
     logger = logging.getLogger("EduRAG")
     # 设置日志级别
     logger.setLevel(logging.INFO)
-    # print(f'logger.handlers-->{logger.handlers}')
     # 避免重复添加处理器
     if not logger.handlers:
         # 创建文件处理器

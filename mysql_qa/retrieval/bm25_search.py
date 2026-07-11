@@ -119,4 +119,7 @@ if __name__ == "__main__":
     redis_client = RedisClient()
     mysql_client = MySQLClient()
     bm25_search = BM25Search(redis_client, mysql_client)
-    bm25_search.search(query="VMware安装VMware时显示灰色如何解决")
+    answer1, _ = bm25_search.search(query="java和python的区别是什么")
+    print(f'第一个问题答案:{answer1}')
+    answer2, _ = bm25_search.search(query="VMware安装VMware时显示灰色如何解决")
+    print(f'第二个问题答案:{answer2}')

@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 # 导入 BGE-M3 嵌入函数，用于生成文档和查询的向量表示
 import torch.cuda
 from milvus_model.hybrid import BGEM3EmbeddingFunction
@@ -11,6 +10,7 @@ from sentence_transformers import CrossEncoder
 # 导入 hashlib 模块，用于生成唯一 ID 的哈希值
 import hashlib
 import sys, os
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rag_qa_path = os.path.dirname(current_dir)
 core_path = os.path.join(rag_qa_path, 'core')
@@ -22,8 +22,8 @@ sys.path.insert(0, project_root)
 from document_processor import *
 from base import logger, Config
 
-
 conf = Config()
+
 
 # 定义 VectorStore 类，封装向量存储和检索功能
 class VectorStore:
@@ -44,16 +44,16 @@ class VectorStore:
         # 设置日志记录器
         self.logger = logger
         # 检查CUDA是否可用
-        self.device ='cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         # 日志提醒使用的是什么设备
         self.logger.info(f"使用设置：{self.device}")
         # 初始化 BGE-Reranker 模型，用于重排序检索结果
         reranker_path = os.path.join(rag_qa_path, 'models', 'bge-reranker-large')
-        # print(f'reranker_path--》{reranker_path}')
         self.reranker = CrossEncoder(reranker_path, device=self.device)
         # 初始化 BGE-M3 嵌入函数，使用 CPU 设备，不启用 FP16
         m3_path = os.path.join(rag_qa_path, 'models', 'bge-m3')
-        self.embedding_function = BGEM3EmbeddingFunction(model_name_or_path=m3_path, use_fp16=(self.device == 'cuda'), device=self.device)
+        self.embedding_function = BGEM3EmbeddingFunction(model_name_or_path=m3_path, use_fp16=False,
+                                                         device=self.device)
         # 获取稠密向量的维度# 1024
         self.dense_dim = self.embedding_function.dim["dense"]
         # 初始化 Milvus 客户端，连接到指定主机和数据库
@@ -117,7 +117,6 @@ class VectorStore:
 
     # 定义方法，向向量存储添加文档
     def add_documents(self, documents):
-        # print(f'documents--》{documents[0]}')
         # 提取所有文档的内容列表
         texts = [doc.page_content for doc in documents]
 
@@ -205,7 +204,7 @@ class VectorStore:
             output_fields=["text", "parent_id", "parent_content", "source", "timestamp"]
         )[0]
         # 将上述搜索到的结果进行Document对象封装，便于查询使用
-        sub_chunks = [self._doc_from_hit(hit["entity"])for hit in results]
+        sub_chunks = [self._doc_from_hit(hit["entity"]) for hit in results]
         # 从子块中提取去重的父文档
         parent_docs = self._get_unique_parent_docs(sub_chunks)
         # # 如果只有1个文档或者没有，直接返回跳过重排序

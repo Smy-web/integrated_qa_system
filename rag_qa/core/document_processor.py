@@ -5,6 +5,7 @@ from langchain_community.document_loaders.markdown import UnstructuredMarkdownLo
 from langchain.text_splitter import MarkdownTextSplitter
 from datetime import datetime
 import sys
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rag_qa_path = os.path.dirname(current_dir)
 sys.path.insert(0, rag_qa_path)
@@ -33,6 +34,8 @@ document_loaders = {
     # Markdown 文件使用 UnstructuredMarkdownLoader
     ".md": UnstructuredMarkdownLoader
 }
+
+
 # 定义函数，从指定文件夹加载多种类型文件并添加元数据
 def load_documents_from_directory(directory_path):
     # 初始化空列表，用于存储加载的文档
@@ -81,10 +84,11 @@ def load_documents_from_directory(directory_path):
     # 返回加载的所有文档列表
     return documents
 
+
 # 定义函数，处理文档并进行分层切分，返回子块结果
 def process_documents(directory_path, parent_chunk_size=conf.PARENT_CHUNK_SIZE,
-                     child_chunk_size=conf.CHILD_CHUNK_SIZE,
-                     chunk_overlap=conf.CHUNK_OVERLAP):
+                      child_chunk_size=conf.CHILD_CHUNK_SIZE,
+                      chunk_overlap=conf.CHUNK_OVERLAP):
     # 从指定目录加载所有文档
     documents = load_documents_from_directory(directory_path)
     # 记录加载的文档总数日志
@@ -99,7 +103,7 @@ def process_documents(directory_path, parent_chunk_size=conf.PARENT_CHUNK_SIZE,
 
     # 初始化空列表，用于存储所有子块
     child_chunks = []
-    #遍历每个原始文档，带上索引 i
+    # 遍历每个原始文档，带上索引 i
     for i, doc in enumerate(documents):
         # # 获取文件的扩展名
         file_extension = os.path.splitext(doc.metadata.get("file_path", ''))[1].lower()
@@ -107,7 +111,8 @@ def process_documents(directory_path, parent_chunk_size=conf.PARENT_CHUNK_SIZE,
         is_markdown = (file_extension == '.md')
         parent_splitter_to_use = markdown_parent_splitter if is_markdown else parent_splitter
         child_splitter_to_use = markdown_child_splitter if is_markdown else child_splitter
-        logger.info(f"处理文档: {doc.metadata['file_path']}, 使用切分器: {'Markdown' if is_markdown else 'ChineseRecursive'}")
+        logger.info(
+            f"处理文档: {doc.metadata['file_path']}, 使用切分器: {'Markdown' if is_markdown else 'ChineseRecursive'}")
         # 使用父块切分器将文档切分为父块
         parent_docs = parent_splitter_to_use.split_documents([doc])
         # 遍历每个父块，带上索引 j
@@ -134,7 +139,7 @@ def process_documents(directory_path, parent_chunk_size=conf.PARENT_CHUNK_SIZE,
 
 
 if __name__ == '__main__':
-    directory_path = '/Users/Smy/Desktop/EduRAG/codes/integrated_qa_system/rag_qa/data/ai_data'
+    directory_path = 'D:/py/integrated_qa_system/rag_qa/data/ai_data'
     child_chunks = process_documents(directory_path)
     print(f'child_chunks--》{child_chunks[0]}')
-
+    print(f'len:{len(child_chunks)}')
